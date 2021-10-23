@@ -21,7 +21,7 @@ class Events(models.Model):
         choices=Applications,
     )
     path = models.CharField(max_length=100)
-    element = models.CharField(max_length=50,blank=True)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    element = models.CharField(max_length=50,null=True)
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
     timestamp = models.DateTimeField(auto_now_add=False)
