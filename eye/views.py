@@ -9,16 +9,26 @@ import datetime
 
 class EventView(APIView):
     def post(self,request,*args,**kwargs):
+        # changes timestamp from string to timstamp form to compair time
+        timestamp = datetime.datetime.fromisoformat(request.data['timestamp'])
+
+        if timestamp > datetime.datetime.now():
+            return Response(data={'timestamp is invalid, must be present or past'},status=status.HTTP_400_BAD_REQUEST)
+
+
         if 'element' in request.data['data']:
             element = request.data['data']['element']
         else:
             element = None
+
+
         if 'form' in request.data['data']:
             firstName = request.data['data']['form']['first_name']
             lastName = request.data['data']['form']['last_name']
         else:
             firstName = None
             lastName = None
+
 
         data_dict = {
             'session_id':request.data['session_id'],
@@ -53,6 +63,8 @@ class SessionView(APIView):
         serializer = EventsSerializer(qs, many=True)
         return Response(serializer.data)
 
+
+
 class CategoryView(APIView):
     def get(self,request,*args,**kwargs):
         category = request.GET.get('category','')
@@ -80,8 +92,18 @@ class TimeView(APIView):
             return Response(data={'Missing end time'}, 
             status=status.HTTP_404_NOT_FOUND)
         
-        time_start = datetime.datetime.fromisoformat(time_i)
-        time_end = datetime.datetime.fromisoformat(time_f)
+
+
+        try:
+            time_start = datetime.datetime.fromisoformat(time_i)
+        except:
+            return Response(data={'invalid start time'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            time_end = datetime.datetime.fromisoformat(time_f)
+        except:
+            return Response(data={'invalid end time'}, status=status.HTTP_400_BAD_REQUEST)
 
 
         qs = Events.objects.filter(timestamp__range = [time_start,time_end])
