@@ -15,13 +15,13 @@ class EventView(APIView):
         if timestamp > datetime.datetime.now():
             return Response(data={'timestamp is invalid, must be present or past'},status=status.HTTP_400_BAD_REQUEST)
 
-
+        # if element is not included, then make it null
         if 'element' in request.data['data']:
             element = request.data['data']['element']
         else:
             element = None
 
-
+        # if form is not included then make first and last name null
         if 'form' in request.data['data']:
             firstName = request.data['data']['form']['first_name']
             lastName = request.data['data']['form']['last_name']
@@ -41,6 +41,7 @@ class EventView(APIView):
             'element':element,
             'timestamp':request.data['timestamp'],
         }
+
         serializer = EventsSerializer(data=data_dict)
         if serializer.is_valid():
             serializer.save()
@@ -52,7 +53,7 @@ class SessionView(APIView):
     def get(self,request,*args,**kwargs):
         session = request.GET.get('session','')
 
-
+        # session id is needed to make query
         if session == '':
             return Response(data={'Missing session_id'}, 
             status=status.HTTP_404_NOT_FOUND)
@@ -68,7 +69,7 @@ class SessionView(APIView):
 class CategoryView(APIView):
     def get(self,request,*args,**kwargs):
         category = request.GET.get('category','')
-
+        # category is needed to make query
         if category == '':
             return Response(data={'Missing category'}, 
             status=status.HTTP_404_NOT_FOUND)
@@ -83,7 +84,7 @@ class TimeView(APIView):
     def get(self,request,*args,**kwargs):
         time_i = request.GET.get('timeStart','')
         time_f = request.GET.get('timeEnd','')
-
+        # initial and final times are needed to make query
         if time_i == '':
             return Response(data={'Missing start time'}, 
             status=status.HTTP_404_NOT_FOUND)
@@ -93,7 +94,8 @@ class TimeView(APIView):
             status=status.HTTP_404_NOT_FOUND)
         
 
-
+        # see if given times can be converted to datetimes, if not then 
+        # they were entered incorectly
         try:
             time_start = datetime.datetime.fromisoformat(time_i)
         except:
