@@ -33,4 +33,16 @@ class EventView(APIView):
         serializer = EventsSerializer(data=data_dict)
         if serializer.is_valid():
             serializer.save()
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SessionView(APIView):
+    def get(self,request,*args,**kwargs):
+        session = request.GET.get('session','')
+        if session == '':
+            return Response(data={'Missing session_id'}, 
+            status=status.HTTP_404_NOT_FOUND)
+        qs = Events.object.filter(session_id = session)
+        serializer = EventsSerializer(qs, many=True)
+        return Response(serializer.data)
