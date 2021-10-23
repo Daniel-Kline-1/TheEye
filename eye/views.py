@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Events
 from .serializers import EventsSerializer
 from rest_framework import status
+import datetime
 # Create your views here.
 
 class EventView(APIView):
@@ -40,9 +41,51 @@ class EventView(APIView):
 class SessionView(APIView):
     def get(self,request,*args,**kwargs):
         session = request.GET.get('session','')
+
+
         if session == '':
             return Response(data={'Missing session_id'}, 
             status=status.HTTP_404_NOT_FOUND)
+
+
+
         qs = Events.object.filter(session_id = session)
+        serializer = EventsSerializer(qs, many=True)
+        return Response(serializer.data)
+
+class CategoryView(APIView):
+    def get(self,request,*args,**kwargs):
+        category = request.GET.get('category','')
+
+        if category == '':
+            return Response(data={'Missing category'}, 
+            status=status.HTTP_404_NOT_FOUND)
+
+
+        qs = Events.object.filter(category = category)
+        serializer = EventsSerializer(qs, many=True)
+        return Response(serializer.data)
+
+
+class TimeView(APIView):
+    def get(self,request,*args,**kwargs):
+        time_i = request.GET.get('timeStart','')
+        time_f = request.GET.get('timeEnd','')
+
+        if time_i == '':
+            return Response(data={'Missing start time'}, 
+            status=status.HTTP_404_NOT_FOUND)
+        
+        if time_f == '':
+            return Response(data={'Missing end time'}, 
+            status=status.HTTP_404_NOT_FOUND)
+        
+        time_start = datetime.datetime.fromisoformat(time_i)
+        time_end = datetime.datetime.fromisoformat(time_f)
+
+
+        qs = Events.objects.filter(timestamp__range = [time_start,time_end])
+        
+        
         serializer = EventsSerializer(qs, many=True)
         return Response(serializer.data)
